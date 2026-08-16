@@ -3,4 +3,4 @@ Allow: /
 Disallow: /node_modules/
 Disallow: /scripts/build/
 
-Sitemap: https://zeyad-dev-portfolio.netlify.app/sitemap.xml
+Sitemap: https://zeyadwalied.github.io/sitemap.xml
