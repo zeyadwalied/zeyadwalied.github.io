@@ -19,7 +19,7 @@
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="X-XSS-Protection" content="1; mode=block">
     <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' https: data:; frame-src https:;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https: file: data:; img-src 'self' data: https: file:; font-src 'self' https: data: file:; frame-src 'self' https: file:;">
     <meta property="og:site_name" content="Zeyad Walid Portfolio">
     <meta property="og:locale" content="en_US">
     <meta property="og:title" content="WordPress & WooCommerce Services | Zeyad Walid">
@@ -68,9 +68,9 @@
     <link rel="icon" type="image/webp" href="assets/images/favicon.webp">
     <link rel="apple-touch-icon" href="assets/images/zeyadlogo.webp">
     <link rel="stylesheet" href="styles/base.css?v=16">
-    <link rel="stylesheet" href="styles/components.css?v=16">
+    <link rel="stylesheet" href="styles/components.css?v=18">
     <link rel="stylesheet" href="styles/effects.css?v=16">
-    <link rel="stylesheet" href="styles/landing.css?v=21">
+    <link rel="stylesheet" href="styles/landing.css?v=23">
     <link rel="stylesheet" href="styles/about.css?v=16">
     <link rel="stylesheet" href="styles/projects.css?v=16">
     <link rel="stylesheet" href="styles/contact.css?v=16">
@@ -104,6 +104,7 @@
                 <li><a href="projects.html" class="nav-link">Projects</a></li>
                 <li><a href="services.html" class="nav-link active">Services</a></li>
                 <li><a href="contact.html" class="nav-link">Contact</a></li>
+                <li><a href="https://flowcv.com/resume/vsnfe0csf5" target="_blank" rel="noopener noreferrer" class="nav-link nav-cv-link">CV</a></li>
                 <li><button class="theme-toggle p-2 rounded-full hover:bg-gray-800 transition-colors" aria-label="Toggle Light/Dark Mode"><svg class="w-6 h-6 sun-icon block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg><svg class="w-6 h-6 moon-icon hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg></button></li>
             </ul>
             <div class="flex items-center md:hidden gap-4">
@@ -297,7 +298,7 @@
     <script src="scripts/waves.js" defer></script>
     <script src="scripts/services-signature-orbs.js?v=4" defer></script>
     <script src="scripts/main.js?v=8" defer></script>
-    <script src="scripts/terminal-section.js?v=4" defer></script>
+    <script src="scripts/terminal-section.js?v=8" defer></script>
 </body>
 </html>
 

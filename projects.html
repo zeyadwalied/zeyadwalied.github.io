@@ -21,7 +21,7 @@
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="X-XSS-Protection" content="1; mode=block">
     <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' https: data:; frame-src https:;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https: file: data:; img-src 'self' data: https: file:; font-src 'self' https: data: file:; frame-src 'self' https: file:;">
     
     <!-- Open Graph SEO -->
     <meta property="og:site_name" content="Zeyad Walid Portfolio">
@@ -47,9 +47,9 @@
     </style>
     <link rel="icon" type="image/webp" href="assets/images/favicon.webp">
     <link rel="stylesheet" href="styles/base.css?v=16">
-    <link rel="stylesheet" href="styles/components.css?v=16">
+    <link rel="stylesheet" href="styles/components.css?v=18">
     <link rel="stylesheet" href="styles/effects.css?v=16">
-    <link rel="stylesheet" href="styles/landing.css?v=16">
+    <link rel="stylesheet" href="styles/landing.css?v=23">
     <link rel="stylesheet" href="styles/about.css?v=16">
     <link rel="stylesheet" href="styles/projects.css?v=16">
     <link rel="stylesheet" href="styles/contact.css?v=16">
@@ -107,6 +107,7 @@
                 <li><a href="projects.html" class="nav-link active">Projects</a></li>
                 <li><a href="services.html" class="nav-link">Services</a></li>
                 <li><a href="contact.html" class="nav-link">Contact</a></li>
+                <li><a href="https://flowcv.com/resume/vsnfe0csf5" target="_blank" rel="noopener noreferrer" class="nav-link nav-cv-link">CV</a></li>
                 <li>
                     <button class="theme-toggle p-2 rounded-full hover:bg-gray-800 transition-colors" aria-label="Toggle Light/Dark Mode">
                         <svg class="w-6 h-6 sun-icon block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
@@ -220,7 +221,7 @@
                 <div class="project-card project-page-card interactive-morph-card flex flex-col glass-panel rounded-xl overflow-hidden border border-gray-800 transition-colors duration-300 scroll-reveal hover-border-accent bg-dark-secondary bg-opacity-80">
                     <div class="h-64 relative bg-gray-900 w-full group overflow-hidden cursor-pointer skeleton-img-wrapper" onclick="openVideoModal('lheaJ-dqDm8')">
                         <div class="skeleton"></div>
-                        <img data-src="https://img.youtube.com/vi/lheaJ-dqDm8/maxresdefault.jpg" alt="Music Update Home Page" class="w-full h-full object-cover transition duration-1000 group-hover:scale-110 group-hover:opacity-50">
+                        <img data-src="https://img.youtube.com/vi/lheaJ-dqDm8/maxresdefault.jpg" alt="Musc Update Home Page" class="w-full h-full object-cover transition duration-1000 group-hover:scale-110 group-hover:opacity-50">
                         <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                             <div class="w-16 h-16 bg-accent rounded-full flex items-center justify-center relative shadow-lg">
                                 <svg class="w-8 h-8 text-dark ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
@@ -229,7 +230,7 @@
                         </div>
                     </div>
                     <div class="p-6 flex-1 flex flex-col">
-                        <h3 class="text-lg font-bold mb-3 text-accent leading-snug">Music Update Home Page</h3>
+                        <h3 class="text-lg font-bold mb-3 text-accent leading-snug">Musc Update Home Page</h3>
                         <p class="text-gray-400 text-sm flex-1">Discover creativity and a fresh new design in the updated music homepage. This demo clearly showcases the transformation with an easy comparison between the "before" and "after" versions.</p>
                         <div class="project-card-actions flex gap-2 mt-8 w-full">
                             <a href="https://musccollection.com/" target="_blank" rel="noopener noreferrer" class="btn-secondary flex-1 justify-center inline-flex items-center gap-2 group px-3 hover:border-[#10b981] hover:text-[#10b981] transition-colors" aria-label="Visit Website">

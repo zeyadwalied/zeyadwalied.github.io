@@ -1,4 +1,4 @@
-﻿/* Custom Component Styles */
+/* Custom Component Styles */
 
 /* Navigation */
 .glass-nav {
@@ -39,6 +39,16 @@
 .nav-link.active {
     color: var(--accent);
     font-weight: 700;
+}
+
+/* Navbar CV link — same design as the other nav links */
+.nav-cv-link {
+    color: var(--accent);
+}
+
+.nav-cv-link.active,
+.nav-cv-link:hover {
+    color: var(--accent-hover);
 }
 
 /* Modern Focus System */

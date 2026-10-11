@@ -55,48 +55,50 @@ document.addEventListener('DOMContentLoaded', () => {
             );
         }
 
-        // 1. Master Hero Timeline — all elements start hidden, appear in sequence
-        const heroTl = gsap.timeline({ delay: 0.2 });
-        
-        // Immediately hide elements to prevent CSS flash
-        gsap.set(".hero-kicker, .hero-role, .hero-actions, .hero-side, .hero-socials", { opacity: 0, y: 20 });
-        gsap.set(".hero-actions a", { opacity: 0, y: 10, scale: 0.9 });
-        gsap.set(".hero-socials a", { opacity: 0, y: 8 });
+        // 1. Master Hero Timeline — only on pages that have hero elements
+        if (document.querySelector('.hero-kicker')) {
+            const heroTl = gsap.timeline({ delay: 0.2 });
 
-        // Kicker text
-        heroTl.to(".hero-kicker", { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" });
+            // Immediately hide elements to prevent CSS flash
+            gsap.set(".hero-kicker, .hero-role, .hero-actions, .hero-side, .hero-socials", { opacity: 0, y: 20 });
+            gsap.set(".hero-actions a", { opacity: 0, y: 10, scale: 0.9 });
+            gsap.set(".hero-socials a", { opacity: 0, y: 8 });
 
-        // Scanner reveal for the name
-        const heroName = document.querySelector('.hero-name-text');
-        const scannerLine = document.querySelector('.scanner-line');
-        if (heroName && scannerLine) {
-            const nameWidth = heroName.getBoundingClientRect().width;
-            heroTl.set(heroName, { opacity: 1, clipPath: "inset(0 100% 0 0)" })
-                  .fromTo(scannerLine, { opacity: 0, left: 0 }, { opacity: 1, duration: 0.1 })
-                  .to(scannerLine, { left: nameWidth, duration: 0.9, ease: "power4.inOut" })
-                  .to(heroName, { clipPath: "inset(0 0% 0 0)", duration: 0.9, ease: "power4.inOut" }, "<")
-                  .to(scannerLine, { opacity: 0, duration: 0.2 });
-        }
+            // Kicker text
+            heroTl.to(".hero-kicker", { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" });
 
-        // Role text
-        heroTl.to(".hero-role", { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, "-=0.3");
+            // Scanner reveal for the name
+            const heroName = document.querySelector('.hero-name-text');
+            const scannerLine = document.querySelector('.scanner-line');
+            if (heroName && scannerLine) {
+                const nameWidth = heroName.getBoundingClientRect().width;
+                heroTl.set(heroName, { opacity: 1, clipPath: "inset(0 100% 0 0)" })
+                      .fromTo(scannerLine, { opacity: 0, left: 0 }, { opacity: 1, duration: 0.1 })
+                      .to(scannerLine, { left: nameWidth, duration: 0.9, ease: "power4.inOut" })
+                      .to(heroName, { clipPath: "inset(0 0% 0 0)", duration: 0.9, ease: "power4.inOut" }, "<")
+                      .to(scannerLine, { opacity: 0, duration: 0.2 });
+            }
 
-        // Buttons — staggered with a bounce
-        heroTl.to(".hero-actions", { opacity: 1, y: 0, duration: 0.3 }, "-=0.2")
-              .to(".hero-actions a", { 
-                  opacity: 1, y: 0, scale: 1, 
-                  stagger: 0.08, duration: 0.5, ease: "back.out(1.7)" 
-              }, "-=0.2");
+            // Role text
+            heroTl.to(".hero-role", { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, "-=0.3");
 
-        // Side panel (detail card)
-        heroTl.to(".hero-side", { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, "-=0.5");
+            // Buttons — staggered with a bounce
+            heroTl.to(".hero-actions", { opacity: 1, y: 0, duration: 0.3 }, "-=0.2")
+                  .to(".hero-actions a", {
+                      opacity: 1, y: 0, scale: 1,
+                      stagger: 0.08, duration: 0.5, ease: "back.out(1.7)"
+                  }, "-=0.2");
 
-        // Socials — staggered pop-in
-        heroTl.to(".hero-socials", { opacity: 1, y: 0, duration: 0.3 }, "-=0.3")
-              .to(".hero-socials a", {
-                  opacity: 1, y: 0, 
-                  stagger: 0.06, duration: 0.4, ease: "back.out(1.4)"
-              }, "-=0.15");
+            // Side panel (detail card)
+            heroTl.to(".hero-side", { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, "-=0.5");
+
+            // Socials — staggered pop-in
+            heroTl.to(".hero-socials", { opacity: 1, y: 0, duration: 0.3 }, "-=0.3")
+                  .to(".hero-socials a", {
+                      opacity: 1, y: 0,
+                      stagger: 0.06, duration: 0.4, ease: "back.out(1.4)"
+                  }, "-=0.15");
+        } // end hero guard
 
         // GSAP Magnetic Button Hover
         document.querySelectorAll('.btn-primary, .btn-secondary').forEach(btn => {

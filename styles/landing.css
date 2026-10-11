@@ -1,4 +1,4 @@
-﻿/* ===== Hero Redesign ===== */
+/* ===== Hero Redesign ===== */
 .hero-section {
     display: flex;
     align-items: center;
@@ -2862,6 +2862,7 @@
     box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
     z-index: 2;
     will-change: transform;
+    margin-top: 40px;
 }
 
 /* (scrolling tilt removed — only green border glow kept, defined below) */
@@ -2990,7 +2991,9 @@
 .terminal-carousel {
     position: relative;
     margin-top: 3rem;
-    min-height: 530px;
+    min-height: 620px;
+    padding-bottom: 3.5rem;
+    overflow: hidden;
 }
 
 .terminal-carousel .terminal-wrapper {
@@ -3001,19 +3004,47 @@
     opacity: 0;
     pointer-events: none;
     z-index: 1;
+    transform: translateX(100%) scale(0.95);
+    transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+                opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform, opacity;
 }
 
+/* Active slide in viewport */
 .terminal-carousel .terminal-wrapper.is-active {
     opacity: 1;
     pointer-events: auto;
     z-index: 2;
+    transform: translateX(0) scale(1);
+}
+
+/* Slide exiting out to the left */
+.terminal-carousel .terminal-wrapper.is-exiting-left {
+    opacity: 0;
+    pointer-events: none;
+    z-index: 1;
+    transform: translateX(-100%) scale(0.95);
+}
+
+/* Slide preparing to enter from the right */
+.terminal-carousel .terminal-wrapper.is-entering-right {
+    opacity: 0;
+    pointer-events: none;
+    z-index: 2;
+    transform: translateX(100%) scale(0.95);
+    transition: none !important;
 }
 
 .terminal-carousel-dots {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0.75rem;
+    z-index: 5;
     display: flex;
     justify-content: center;
     gap: 0.85rem;
-    margin-top: 1.5rem;
+    margin-top: 0;
 }
 
 .terminal-carousel-dots span {
@@ -3104,11 +3135,12 @@
 
     .terminal-carousel {
         margin-top: 1rem;
-        min-height: 290px;
+        min-height: 320px;
+        padding-bottom: 2.25rem;
     }
     .terminal-carousel-dots {
         gap: 0.6rem;
-        margin-top: 1rem;
+        bottom: 0.4rem;
     }
     .terminal-carousel-dots span {
         width: 0.55rem;
