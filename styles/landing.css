@@ -509,9 +509,21 @@
         display: none !important;
     }
 
+    /* content-visibility skips off-screen layout, but `1px 900px` forces a FAKE
+       height: the projects page is one tall <section>, so it measured 900px no
+       matter how many cards it held. Lenis/ScrollTrigger then computed a tiny
+       maxScroll and scrolling stalled. `auto <height>` keeps a sane placeholder
+       and lets the browser remember the real measured size. */
     .mobile-performance-mode section:not(.hero-section) {
         content-visibility: auto;
-        contain-intrinsic-size: 1px 900px;
+        contain-intrinsic-size: auto 900px;
+    }
+
+    /* Never skip layout for the page that hosts the whole card grid: the
+       scrollable height must stay accurate or smooth scrolling breaks. */
+    .mobile-performance-mode .projects-gallery-section {
+        content-visibility: visible;
+        contain-intrinsic-size: none;
     }
 
     .mobile-performance-mode .skill-bar {

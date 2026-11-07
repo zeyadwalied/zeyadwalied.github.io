@@ -1,4 +1,4 @@
-﻿/* ===== Hero Flowing Lines (static, no animation for perf) ===== */
+/* ===== Hero Flowing Lines (static, no animation for perf) ===== */
 .hero-lines {
     position: absolute;
     inset: 0;
@@ -55,12 +55,20 @@
     position: fixed;
     top: 0;
     left: 0;
-    transform: translate(-50%, -50%);
+    /* Move with transform (compositor-only), NOT left/top. Animating left/top
+       forced a full page relayout on every mousemove frame, which is what made
+       the cursor lag and stutter. The translate(-50%, -50%) centering is baked
+       into the variable so a single transform does both jobs. */
+    --cursor-x: 0px;
+    --cursor-y: 0px;
+    transform: translate3d(var(--cursor-x), var(--cursor-y), 0) translate(-50%, -50%);
     border-radius: 50%;
     z-index: 9999;
     opacity: 0;
     transition: opacity 0.3s ease;
-    will-change: left, top;
+    will-change: transform;
+    backface-visibility: hidden;
+    /* Keep the cursor out of the page's layout/paint trees. */
     contain: layout style;
 }
 
@@ -136,14 +144,12 @@ html.video-modal-open .cursor-outline {
     width: 6px;
     height: 6px;
     background-color: var(--accent);
-    contain: strict;
 }
 
 .cursor-outline {
     width: 30px;
     height: 30px;
     border: 2px solid var(--accent);
-    contain: strict;
 }
 
 @keyframes spin-slow {
@@ -166,7 +172,9 @@ html.video-modal-open .cursor-outline {
 }
 
 .cursor-hover .cursor-outline {
-    transform: translate(-50%, -50%) scale(1.6);
+    /* Must keep the translate3d position vars, otherwise this rule resets the
+       cursor to the top-left corner whenever a link is hovered. */
+    transform: translate3d(var(--cursor-x), var(--cursor-y), 0) translate(-50%, -50%) scale(1.6);
     background-color: rgba(16, 185, 129, 0.1);
 }
 

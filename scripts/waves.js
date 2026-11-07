@@ -81,10 +81,18 @@ ClassicalNoise.prototype.noise = function(x, y, z) {
         }
     }
 
+    var lastFrame = 0;
+
     function animate() {
+        // Throttle to ~30fps: this is a soft, blurred background. Drawing it every
+        // frame at 60fps competed with the cursor and scroll for the main thread.
         if (isActive && isWaveAnimationEnabled()) {
-            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-            draw();
+            var now = performance.now();
+            if (now - lastFrame >= 33) {
+                lastFrame = now;
+                ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+                draw();
+            }
         }
         requestAnimationFrame(animate);
     }

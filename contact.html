@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
@@ -37,7 +37,8 @@
     <meta name="twitter:image" content="https://zeyadwalied.github.io/assets/images/favicon.webp">
     <style>
         :root { color-scheme: dark; }
-        html { scroll-behavior: smooth; }
+        /* scroll-behavior: smooth REMOVED â€” it double-smooths against Lenis and
+           made the mouse wheel feel delayed. base.css handles the Lenis case. */
         body { margin: 0; min-height: 100vh; background: #020617; color: #f8fafc; font: 16px/1.6 Inter, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; overflow-x: hidden; }
         img { display: block; max-width: 100%; }
         .container { width: min(100%, 1200px); margin: 0 auto; }
@@ -46,9 +47,9 @@
         .social-icon { width: 3rem; height: 3rem; display: flex; align-items: center; justify-content: center; border-radius: 9999px; }
     </style>
     <link rel="icon" type="image/webp" href="assets/images/favicon.webp">
-    <link rel="stylesheet" href="styles/base.css?v=16">
+    <link rel="stylesheet" href="styles/base.css?v=18">
     <link rel="stylesheet" href="styles/components.css?v=18">
-    <link rel="stylesheet" href="styles/effects.css?v=16">
+    <link rel="stylesheet" href="styles/effects.css?v=17">
     <link rel="stylesheet" href="styles/landing.css?v=23">
     <link rel="stylesheet" href="styles/about.css?v=16">
     <link rel="stylesheet" href="styles/projects.css?v=16">
@@ -213,9 +214,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
     
-    <script src="scripts/waves.js" defer></script>
+    <script src="scripts/waves.js?v=2" defer></script>
     <script src="scripts/contact-signature-orbs.js?v=1" defer></script>
-        <script src="scripts/main.js?v=4" defer></script>
+        <script src="scripts/main.js?v=7" defer></script>
     </body>
 </html>
 

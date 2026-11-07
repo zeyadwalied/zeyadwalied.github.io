@@ -4,7 +4,7 @@ class ProjectsSignatureOrbs {
         if (!this.canvas) return;
         this.ctx = this.canvas.getContext('2d');
         this.particles = [];
-        this.numParticles = options.numParticles || 800;
+        this.numParticles = options.numParticles || 480;
         this.isMorphing = false;
         this.colors = options.colors || ['#10b981', '#3b82f6', '#ef4444', '#f97316', '#8b5cf6'];
 
@@ -83,7 +83,7 @@ class ProjectsSignatureOrbs {
     createRandomParticles() {
         this.particles = [];
         const isSmall = window.matchMedia('(max-width: 767px)').matches;
-        const total = isSmall ? 420 : this.numParticles;
+        const total = isSmall ? 260 : this.numParticles;
         for (let i = 0; i < total; i++) {
             const x = (Math.random() - 0.5) * 8;
             const y = (Math.random() - 0.5) * 8;
@@ -188,10 +188,20 @@ class ProjectsSignatureOrbs {
     }
 
     animate() {
-        if (!this.isActive) {
+        if (!this.isActive || document.hidden) {
+            // Fully idle while off-screen or hidden: still keep the loop alive so
+            // it resumes, but draw nothing.
             requestAnimationFrame(this.animate.bind(this));
             return;
         }
+        const now = performance.now();
+        // Cap at ~40fps. The canvas is decorative; 60fps bought nothing but
+        // main-thread contention with scrolling and the custom cursor.
+        if (this._lastFrame && now - this._lastFrame < 24) {
+            requestAnimationFrame(this.animate.bind(this));
+            return;
+        }
+        this._lastFrame = now;
         this.ctx.clearRect(0, 0, this.renderWidth, this.renderHeight);
         if (!this.isMorphing) {
             this.particles.forEach(p => {

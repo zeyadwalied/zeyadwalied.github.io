@@ -3,18 +3,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const isMobile = window.matchMedia('(max-width: 767px)').matches;
     if (typeof Lenis !== 'undefined') {
         window.lenis = new Lenis({
-            duration: isMobile ? 1.2 : 2.4, // Faster on mobile for better performance
-            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -12 * t)),
+            // lerp = fraction of the REMAINING distance covered per frame, so lower
+            // = more input lag. Dragging the native scrollbar bypasses Lenis
+            // entirely (the browser moves it directly), which is why the bar felt
+            // instant while the wheel felt sluggish — the delay was Lenis itself.
+            // 0.14 needed ~15 frames (~250ms) to catch up. 0.28 settles in ~5
+            // frames: still smoothed, but it tracks the wheel almost immediately.
+            lerp: isMobile ? 0.35 : 0.28,
             direction: 'vertical',
             smoothWheel: true,
-            wheelMultiplier: isMobile ? 1.0 : 0.85, // Less smoothing on mobile
-            touchMultiplier: isMobile ? 1.2 : 1.6, // Less aggressive touch scroll
-            lerp: isMobile ? 0.15 : 0.08, // Higher lerp = less smooth but better performance
-            infinite: false
+            wheelMultiplier: 1.0,
+            touchMultiplier: 1.6,
+            infinite: false,
+            syncTouch: false
         });
 
         if (typeof gsap !== 'undefined') {
             window.lenis.on('scroll', ScrollTrigger.update);
+            // Drive Lenis from the raw frame clock. lagSmoothing(0) made GSAP
+            // report a stale `time` after any dropped frame, so a slow frame
+            // dragged the scroll position behind and it visibly "caught up"
+            // late — on top of Lenis's own smoothing.
             gsap.ticker.add((time) => {
                 window.lenis.raf(time * 1000);
             });
@@ -26,6 +35,29 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             requestAnimationFrame(raf);
         }
+
+        // Lenis caches the scrollable height on resize. Animations that grow the
+        // page (reveals turning opacity 0 -> 1, images loading, fonts) change that
+        // height afterwards, which leaves maxScroll too small and makes the page
+        // refuse to scroll past a point. Keep it in sync.
+        const syncLenisLimit = () => {
+            if (!window.lenis) return;
+            window.lenis.resize();
+        };
+        window.addEventListener('load', syncLenisLimit);
+        if (document.fonts && document.fonts.ready) {
+            document.fonts.ready.then(syncLenisLimit).catch(() => {});
+        }
+        let limitRaf;
+        window.addEventListener('resize', () => {
+            cancelAnimationFrame(limitRaf);
+            limitRaf = requestAnimationFrame(syncLenisLimit);
+        });
+        // Safety net: re-measure a few times during the first seconds while
+        // reveal animations and lazy images settle.
+        [300, 900, 1800, 3000].forEach((delay) => {
+            setTimeout(syncLenisLimit, delay);
+        });
     }
 
     // ===== GSAP Sophisticated Modern Animations =====
@@ -199,7 +231,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // 6. Generic Scroll Reveals (Containers etc)
-        gsap.utils.toArray('.scroll-reveal:not(h1):not(h2)').forEach(el => {
+        // `.project-card` is excluded: it has its own curtain reveal below, and
+        // letting both run left cards permanently clipped.
+        gsap.utils.toArray('.scroll-reveal:not(h1):not(h2):not(.project-card)').forEach(el => {
             gsap.fromTo(el, 
                 { opacity: 0, y: 30 },
                 { 
@@ -227,48 +261,78 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // 4. Projects — Clip-path Curtain Reveal + Image Zoom
+        // NOTE: on projects.html each element carries BOTH `.scroll-reveal` and
+        // `.project-card`, so the generic reveal above and this one used to animate
+        // the same node concurrently (opacity vs. clip-path). Whichever finished last
+        // won, and a card whose trigger sat above the viewport stayed clipped at
+        // `inset(100%)` — permanently invisible. We now skip cards in the generic
+        // reveal and always land on a visible end state.
         const projectCards = gsap.utils.toArray('.project-card');
         projectCards.forEach((card) => {
             const img = card.querySelector('img');
             const content = card.querySelector('.p-6');
-            
+
+            gsap.set(card, { clipPath: "inset(100% 0 0 0)", opacity: 0 });
+
+            // paused: true is essential — a GSAP timeline plays on creation by
+            // default, which would reveal every card before it scrolled into view
+            // and then leave it in whatever state the interrupted tween produced.
             let tl = gsap.timeline({
+                paused: true,
                 scrollTrigger: {
                     trigger: card,
                     start: "top 85%",
+                    once: true,
+                    onEnter: () => tl.play()
                 }
             });
 
-            tl.fromTo(card, 
-                { clipPath: "inset(100% 0 0 0)", opacity: 0 },
-                { clipPath: "inset(0% 0 0 0)", opacity: 1, duration: 1, ease: "power4.out" }
-            );
+            tl.to(card, {
+                clipPath: "inset(0% 0 0 0)",
+                opacity: 1,
+                duration: 1,
+                ease: "power4.out",
+                // Guarantee the final visible state even if the tween is interrupted.
+                onComplete: () => gsap.set(card, { clipPath: "inset(0% 0 0 0)", opacity: 1 })
+            });
 
             if (img) {
-                // Initial Entrance
-                tl.fromTo(img,
-                    { scale: 1.4, filter: "blur(5px)" },
-                    { scale: 1.05, filter: "blur(0px)", duration: 1.2, ease: "power3.out" }, "-=0.8"
-                );
-                
-                // Parallax Effect
-                gsap.to(img, {
-                    yPercent: 15,
-                    ease: "none",
-                    scrollTrigger: {
-                        trigger: card,
-                        start: "top bottom",
-                        end: "bottom top",
-                        scrub: true
-                    }
-                });
+                if (!isMobileMotionViewport) {
+                    tl.fromTo(img,
+                        { scale: 1.4, filter: "blur(5px)" },
+                        { scale: 1.05, filter: "blur(0px)", duration: 1.2, ease: "power3.out" }, "-=0.8"
+                    );
+
+                    // Parallax Effect — desktop only. Nine simultaneous scrubbed
+                    // image transforms plus blur is what made the page stutter.
+                    gsap.to(img, {
+                        yPercent: 15,
+                        ease: "none",
+                        scrollTrigger: {
+                            trigger: card,
+                            start: "top bottom",
+                            end: "bottom top",
+                            scrub: true
+                        }
+                    });
+                } else {
+                    gsap.set(img, { scale: 1, filter: "none" });
+                }
             }
 
             if (content) {
-                tl.fromTo(content.children, 
+                tl.fromTo(content.children,
                     { y: 20, opacity: 0 },
                     { y: 0, opacity: 1, duration: 0.6, stagger: 0.08, ease: "power2.out" }, "-=0.8"
                 );
+            }
+
+            // Safety net: if the card is already inside the viewport when triggers
+            // are built, ScrollTrigger may not emit onEnter for it. Reveal it now so
+            // no card can remain clipped and invisible.
+            const rect = card.getBoundingClientRect();
+            if (rect.top < window.innerHeight * 0.85) {
+                tl.play();
             }
         });
         
@@ -1101,6 +1165,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 modal.classList.add('opacity-100');
             }, 10);
             document.body.style.overflow = 'hidden';
+            // Lenis scrolls the page itself, so also stop it while the modal is open.
+            if (window.lenis) window.lenis.stop();
             
             // Add skeleton listener
             const skeleton = modal.querySelector('.skeleton');
@@ -1119,6 +1185,10 @@ document.addEventListener('DOMContentLoaded', () => {
             modal.classList.remove('opacity-100');
             modal.classList.add('opacity-0');
             document.body.style.overflow = 'auto';
+            if (window.lenis) {
+                window.lenis.start();
+                window.lenis.resize();
+            }
             setTimeout(() => {
                 modal.classList.remove('flex');
                 modal.classList.add('hidden');
@@ -1216,69 +1286,100 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let outX = 0, outY = 0, mouseX = 0, mouseY = 0;
         let cursorDirty = false;
+        let cursorVisible = false;
+        let rafId = null;
+
+        // Edge detection used to toggle classes on EVERY mousemove, forcing a
+        // style recalc each time. Only write when the state actually changes.
+        let hideState = null;
+        const setHidden = (hidden) => {
+            if (hideState === hidden) return;
+            hideState = hidden;
+            dot.classList.toggle('cursor-hide', hidden);
+            outline.classList.toggle('cursor-hide', hidden);
+        };
 
         window.addEventListener('mousemove', (e) => {
             mouseX = e.clientX;
             mouseY = e.clientY;
-            cursorDirty = true;
 
             if (document.documentElement.classList.contains('video-modal-open')) {
-                dot.classList.add('cursor-hide');
-                outline.classList.add('cursor-hide');
+                setHidden(true);
                 return;
             }
-            
-            // Hide if near scrollbar (right side) or top/bottom/left edges
-            if (mouseX > window.innerWidth - 25 || mouseY < 5 || mouseX < 5 || mouseY > window.innerHeight - 5) {
-                dot.classList.add('cursor-hide');
-                outline.classList.add('cursor-hide');
-            } else {
-                dot.classList.remove('cursor-hide');
-                outline.classList.remove('cursor-hide');
+
+            // Hide near the scrollbar / viewport edges.
+            const nearEdge = mouseX > window.innerWidth - 25 || mouseY < 5 || mouseX < 5 || mouseY > window.innerHeight - 5;
+            setHidden(nearEdge);
+
+            // Wake the loop only when the pointer moves.
+            if (!cursorVisible && !nearEdge) {
+                cursorVisible = true;
+                dot.style.opacity = '1';
+                outline.style.opacity = '1';
             }
+            cursorDirty = true;
+            ensureTick();
         });
 
         document.addEventListener('mouseleave', () => {
-            dot.classList.add('cursor-hide');
-            outline.classList.add('cursor-hide');
+            setHidden(true);
+            cursorVisible = false;
         });
 
         document.addEventListener('mouseenter', () => {
-            if (document.documentElement.classList.contains('video-modal-open')) {
-                return;
-            }
-            dot.classList.remove('cursor-hide');
-            outline.classList.remove('cursor-hide');
+            if (document.documentElement.classList.contains('video-modal-open')) return;
+            setHidden(false);
         });
 
-        // Batch all cursor DOM writes into a single rAF loop
+        // Single rAF loop that idles itself out. Writing transforms instead of
+        // left/top keeps this off the layout path entirely.
         const tick = () => {
             if (cursorDirty) {
-                dot.style.left = mouseX + 'px';
-                dot.style.top  = mouseY + 'px';
-                dot.style.opacity = '1';
-                outline.style.opacity = '1';
+                dot.style.setProperty('--cursor-x', mouseX + 'px');
+                dot.style.setProperty('--cursor-y', mouseY + 'px');
                 cursorDirty = false;
             }
+
             outX += (mouseX - outX) * 0.15;
             outY += (mouseY - outY) * 0.15;
-            outline.style.left = outX + 'px';
-            outline.style.top  = outY + 'px';
-            requestAnimationFrame(tick);
+            outline.style.setProperty('--cursor-x', outX + 'px');
+            outline.style.setProperty('--cursor-y', outY + 'px');
+
+            // Park the loop once the outline has caught up to the pointer, or the
+            // tab is hidden. ensureTick() restarts it on the next mousemove, so an
+            // idle page costs zero frames.
+            const settled = Math.abs(mouseX - outX) < 0.3 && Math.abs(mouseY - outY) < 0.3;
+            if ((settled && !cursorDirty) || document.hidden) {
+                rafId = null;
+                return;
+            }
+            rafId = requestAnimationFrame(tick);
         };
-        tick();
 
-        // Hover enlarge on interactive elements
-        document.addEventListener('pointerover', (event) => {
-            if (event.target.closest('a, button, .social-icon, .theme-toggle')) {
-                document.body.classList.add('cursor-hover');
-            }
-        });
+        const ensureTick = () => {
+            if (rafId === null) rafId = requestAnimationFrame(tick);
+        };
+        ensureTick();
 
-        document.addEventListener('pointerout', (event) => {
-            if (event.target.closest('a, button, .social-icon, .theme-toggle')) {
-                document.body.classList.remove('cursor-hover');
-            }
+// Hover enlarge on interactive elements.
+        // pointerover/pointerout fire for every descendant (an SVG icon inside a
+        // link fired ~20 times per crossing). pointermove + a state check keeps it
+        // to one write per actual change.
+        const HOVER_SELECTOR = 'a, button, .social-icon, .theme-toggle';
+        let hoverState = false;
+        document.addEventListener('pointermove', (event) => {
+            const isHover = !!event.target.closest(HOVER_SELECTOR);
+            if (isHover === hoverState) return;
+            hoverState = isHover;
+            document.body.classList.toggle('cursor-hover', isHover);
+        }, { passive: true });
+
+        // Reset when leaving the window so the ring doesn't stay enlarged.
+        document.addEventListener('mouseleave', () => {
+            if (!hoverState) return;
+            hoverState = false;
+            document.body.classList.remove('cursor-hover');
         });
     }
 

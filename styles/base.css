@@ -1,4 +1,4 @@
-﻿:root {
+:root {
     --dark: #020617;
     --dark-secondary: #0f172a;
     --light: #f8fafc;
@@ -111,6 +111,23 @@ h1, h2, h3, h4, h5, h6, .hero-title, .section-title {
 .js-enabled .project-card {
     opacity: 0;
     clip-path: inset(100% 0 0 0);
+}
+
+/* A card that also carries .scroll-reveal is animated once, by the curtain
+   reveal only. Without this the two CSS rules stack and the card never
+   reaches a visible state. */
+.js-enabled .project-card.scroll-reveal {
+    transform: none;
+}
+
+/* Safety: if JS/ScrollTrigger never runs (blocked CDN, error), don't leave the
+   page full of invisible cards. */
+.no-gsap .project-card,
+.no-gsap .scroll-reveal:not(h1):not(h2),
+html:not(.js-enabled) .project-card {
+    opacity: 1 !important;
+    clip-path: none !important;
+    transform: none !important;
 }
 
 .js-enabled .project-card img {
@@ -238,7 +255,39 @@ h1, h2, h3, h4, h5, h6, .hero-title, .section-title {
     border-width: 0;
 }
 
-/* html scroll-behavior: smooth; REMOVED FOR LENIS */
+/* ===== Lenis integration =====
+   Lenis adds `.lenis` / `.lenis-smooth` to <html> when it takes over scrolling.
+   While it is active, native smooth scrolling MUST be off: otherwise every wheel
+   tick is smooth-scrolled twice (once by Lenis, once by the browser), which is
+   what made the mouse wheel feel delayed while dragging the native scrollbar
+   stayed instant (the bar bypasses Lenis entirely).
+   Pages still carry `class="scroll-smooth"` on <html>, so override it here. */
+html.lenis,
+html.lenis body {
+    height: auto;
+}
+
+.lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+    overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+    overflow: hidden;
+}
+
+.lenis.lenis-smooth iframe {
+    pointer-events: none;
+}
+
+/* Fallback: if Lenis never initialises (blocked CDN), keep the anchor-link
+   smoothness that `scroll-smooth` provided. */
+html.scroll-smooth:not(.lenis) {
+    scroll-behavior: smooth;
+}
 
 @media (min-width: 1024px) {
     body {
